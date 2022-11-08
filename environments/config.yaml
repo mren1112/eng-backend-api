@@ -1,0 +1,35 @@
+ruUnicon: 
+  port: ":80"
+
+db: 
+  openDriver: "godror"
+  connection: 
+    "user=\"tr100\" 
+     password=\"txt6r9r3\" 
+     connectString=\"10.2.1.125:1541/RUDEV?expire_timconnect_time=2\"
+     sysdba=0
+     sysoper=0
+     poolMinSessions=1
+     poolMaxSessions=1000
+     poolIncrement=1
+     standaloneConnection=0
+     enableEvents=0
+     heterogeneousPool=0
+     externalAuth=0
+     prelim=0
+     poolWaitTimeout=5m
+     poolSessionMaxLifetime=1h
+     poolSessionTimeout=30s
+     timezone=\"local\""
+ 
+redis_cache:
+  addressInLocal: "localhost:6000" 
+  addressInContainer: "ru-unicon-caching:6379"
+  addressInServer: "202.41.160.134:6000"
+  password: "admin-ru-unicon-caching"
+  db-num: 0
+
+token: 
+  issuer: "Ru-unicon"
+  secretKey: "Aabbcc11@"
+
