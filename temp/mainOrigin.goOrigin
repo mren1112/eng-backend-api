@@ -1,0 +1,114 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"unicon-api/databases"
+	"unicon-api/environments"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+	_ "github.com/godror/godror"
+	"github.com/jmoiron/sqlx"
+	"github.com/spf13/viper"
+)
+
+var oracle_db *sqlx.DB
+var redis_cache *redis.Client
+
+type Unicon struct {
+	YEAR                 string `db:"YEAR" json:"YEAR"`
+	SEMESTER             string `db:"SEMESTER" json:"SEMESTER"`
+	UNIV_ID              string `db:"UNIV_ID" json:"UNIV_ID"`
+	CITIZEN_ID           string `db:"CITIZEN_ID" json:"CITIZEN_ID"`
+	STD_ID               string `db:"STD_ID" json:"STD_ID"`
+	PREFIX_NAME_ID       string `db:"PREFIX_NAME_ID" json:"PREFIX_NAME_ID"`
+	STD_FNAME            string `db:"STD_FNAME" json:"STD_FNAME"`
+	STD_MNAME            string `db:"STD_MNAME" json:"STD_MNAME"`
+	STD_LNAME            string `db:"STD_LNAME" json:"STD_LNAME"`
+	STD_FNAME_EN         string `db:"STD_FNAME_EN" json:"STD_FNAME_EN"`
+	STD_MNAME_EN         string `db:"STD_MNAME_EN" json:"STD_MNAME_EN"`
+	STD_LNAME_EN         string `db:"STD_LNAME_EN" json:"STD_LNAME_EN"`
+	GENDER_ID            string `db:"GENDER_ID" json:"GENDER_ID"`
+	BIRTHDAY             string `db:"BIRTHDAY" json:"BIRTHDAY"`
+	SUB_DISTRICT_ID      string `db:"SUB_DISTRICT_ID" json:"SUB_DISTRICT_ID"`
+	NATIONALITY_ID       string `db:"NATIONALITY_ID" json:"NATIONALITY_ID"`
+	ADMIT_YEAR           string `db:"ADMIT_YEAR" json:"ADMIT_YEAR"`
+	FAC_ID               string `db:"FAC_ID" json:"FAC_ID"`
+	CURR_ID              string `db:"CURR_ID" json:"CURR_ID"`
+	STUDY_TYPE_ID        string `db:"STUDY_TYPE_ID" json:"STUDY_TYPE_ID"`
+	STUDY_TIME_ID        string `db:"STUDY_TIME_ID" json:"STUDY_TIME_ID"`
+	STUDY_REG_ID         string `db:"STUDY_REG_ID" json:"STUDY_REG_ID"`
+	CURR_REG_ID          string `db:"CURR_REG_ID" json:"CURR_REG_ID"`
+	CLASS                string `db:"CLASS" json:"CLASS"`
+	GRAD_STATUS_ID       string `db:"GRAD_STATUS_ID" json:"GRAD_STATUS_ID"`
+	STD_STATUS_ID        string `db:"STD_STATUS_ID" json:"STD_STATUS_ID"`
+	TERMINATE_STUDY_CASE string `db:"TERMINATE_STUDY_CASE" json:"TERMINATE_STUDY_CAU"`
+	GPA                  string `db:"GPA" json:"GPA"`
+	GPAX                 string `db:"GPAX" json:"GPAX"`
+	NUM_CREDIT           string `db:"NUM_CREDIT" json:"NUM_CREDIT"`
+	ACC_CREDIT           string `db:"ACC_CREDIT" json:"ACC_CREDIT"`
+	DEFORM_ID            string `db:"DEFORM_ID" json:"DEFORM_ID"`
+	FUND_STATUS_ID       string `db:"FUND_STATUS_ID" json:"FUND_STATUS_ID"`
+	FUND_NAME            string `db:"FUND_NAME" json:"FUND_NAME"`
+	TALENT_ID            string `db:"TALENT_ID" json:"TALENT_ID"`
+	PASSPORT_NUMBER      string `db:"PASSPORT_NUMBER" json:"PASSPORT_NUMBER"`
+	PASSPORT_STARTDATE   string `db:"PASSPORT_STARTDATE" json:"PASSPORT_STARTDATE"`
+	PASSPORT_ENDDATE     string `db:"PASSPORT_ENDDATE" json:"PASSPORT_ENDDATE"`
+	DEGREE_NUM           string `db:"DEGREE_NUM" json:"DEGREE_NUM"`
+}
+
+var ctx = context.Background()
+
+func init() {
+	environments.TimeZoneInit()
+	environments.EnvironmentInit()
+	oracle_db = databases.NewDatabases().OracleInit()
+	redis_cache = databases.NewDatabases().RedisInint()
+}
+
+func main() {
+	defer oracle_db.Close()
+	defer redis_cache.Close()
+	gin.SetMode(gin.ReleaseMode)
+	// fmt.Print(oracle_db)
+	// fmt.Print("redis", redis_cache)
+
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	router.GET("/unicon", func(c *gin.Context) {
+		unicon := []Unicon{}
+		// key := "unicon"
+		// uniconCache, err := redis_cache.Get(ctx, key).Result()
+		// if err == nil {
+
+		// 	_ = json.Unmarshal([]byte(uniconCache), &unicon)
+		// 	c.JSON(http.StatusOK, unicon)
+		// 	return
+		// }
+
+		// query := `select YEAR, SEMESTER, UNIV_ID, CITIZEN_ID, STD_ID, PREFIX_NAME_ID, STD_FNAME, STD_MNAME, STD_LNAME, STD_FNAME_EN, STD_MNAME_EN, STD_LNAME_EN, GENDER_ID, BIRTHDAY, SUB_DISTRICT_ID, NATIONALITY_ID, ADMIT_YEAR, FAC_ID, CURR_ID, STUDY_TYPE_ID, STUDY_TIME_ID, CURR_REG_ID, CLASS, GRAD_STATUS_ID, STD_STATUS_ID, TERMINATE_STUDY_CASE, GPA, GPAX, NUM_CREDIT, ACC_CREDIT, DEFORM_ID, FUND_STATUS_ID, FUND_NAME, TALENT_ID, PASSPORT_NUMBER, PASSPORT_STARTDATE, PASSPORT_ENDDATE, DEGREE_NUM from dbbach00.vm_ds1001 where STD_ID = '6154501842'`
+		query := `select YEAR, SEMESTER, UNIV_ID, CITIZEN_ID, STD_ID, PREFIX_NAME_ID, STD_FNAME, STD_MNAME, STD_LNAME, STD_FNAME_EN, 
+		STD_MNAME_EN, STD_LNAME_EN, GENDER_ID, '2531-02-28' as BIRTHDAY, SUB_DISTRICT_ID, NATIONALITY_ID, ADMIT_YEAR, FAC_ID, 
+		CURR_ID, STUDY_TYPE_ID, STUDY_TIME_ID, CURR_REG_ID, CLASS, GRAD_STATUS_ID, STD_STATUS_ID, TERMINATE_STUDY_CASE, GPA, GPAX, 
+		NUM_CREDIT, ACC_CREDIT, DEFORM_ID, FUND_STATUS_ID, FUND_NAME, TALENT_ID, PASSPORT_NUMBER, DEGREE_NUM 
+		from dbbach00.vm_ds1001  where ROWNUM <= 20`
+
+		err := oracle_db.Select(&unicon, query)
+
+		if err != nil {
+			fmt.Print(err)
+			c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+			return
+		}
+		// uniconJSON, _ := json.Marshal(unicon)
+		// timeNow := time.Now()
+		// redisCacheUnicon := time.Unix(timeNow.Add(time.Minute*2).Unix(), 0)
+		// _ = redis_cache.Set(ctx, key, uniconJSON, redisCacheUnicon.Sub(timeNow)).Err()
+		c.JSON(http.StatusOK, unicon)
+
+	})
+	PORT := viper.GetString("ruUnicon.port")
+	router.Run(PORT)
+}

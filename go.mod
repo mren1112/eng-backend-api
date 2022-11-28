@@ -1,5 +1,6 @@
 module eng-backend-api
 
+<<<<<<< HEAD
 go 1.19
 
 require (
@@ -43,4 +44,14 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/spf13/viper v1.12.0
 	google.golang.org/protobuf v1.28.0 // indirect
+=======
+go 1.14
+
+require (
+	github.com/gin-gonic/gin v1.8.1
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/godror/godror v0.34.0
+	github.com/jmoiron/sqlx v1.3.5
+	github.com/spf13/viper v1.12.0
+>>>>>>> d59ef4c7f3f3949a5d269274d97355325461518d
 )
